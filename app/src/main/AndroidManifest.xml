@@ -9,14 +9,15 @@
             android:label="@string/app_name"
             android:supportsRtl="true"
             android:theme="@style/Theme.LeaderboardApp">
+
         <activity
-                android:name=".MainActivity"
+                android:name=".app.MainActivity"
                 android:exported="true"
                 android:label="@string/app_name"
-                android:theme="@style/Theme.LeaderboardApp">
+                android:theme="@style/Theme.LeaderboardApp"
+                android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
