@@ -26,9 +26,14 @@ class ScoreGenerator(
 ) {
     // Cache to maintain deterministic scores per session
     private val scoreCache = mutableMapOf<String, Long>().apply {
-        players.forEach { player ->
-            this[player.id] = 0L
+        players.forEachIndexed { index, player ->
+            this[player.id] = initialScoreFor(index)
         }
+    }
+
+    private fun initialScoreFor(index: Int): Long {
+        val seedScores = listOf(3200L, 3100L, 3000L, 2900L, 1450L, 1200L, 1100L, 1000L)
+        return if (index < seedScores.size) seedScores[index] else Random.nextLong(200, 900)
     }
 
     /**

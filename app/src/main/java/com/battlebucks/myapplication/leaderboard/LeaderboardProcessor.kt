@@ -26,8 +26,9 @@ class LeaderboardProcessor(
 ) {
     // Thread-safe score storage
     private val scores = mutableMapOf<String, Long>().apply {
-        initialPlayers.forEach { player ->
-            this[player.id] = 0L
+        val seedScores = listOf(3200L, 3100L, 3000L, 2900L, 1450L, 1200L, 1100L, 1000L)
+        initialPlayers.forEachIndexed { index, player ->
+            this[player.id] = if (index < seedScores.size) seedScores[index] else 0L
         }
     }
 
@@ -36,6 +37,12 @@ class LeaderboardProcessor(
     // Reactive leaderboard state
     private val _leaderboardState = MutableStateFlow<List<LeaderboardEntry>>(emptyList())
     val leaderboardState: StateFlow<List<LeaderboardEntry>> = _leaderboardState.asStateFlow()
+
+    suspend fun initialize() {
+        mutex.withLock {
+            updateLeaderboard()
+        }
+    }
 
     /**
      * Process a single score update

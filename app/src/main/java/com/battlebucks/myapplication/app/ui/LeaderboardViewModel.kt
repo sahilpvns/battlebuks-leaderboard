@@ -11,17 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel - Bridge between Engine and UI
- *
- * Responsibilities:
- * - Start score generation
- * - Collect leaderboard state
- * - Expose UI state
- *
- * Ranking logic does NOT live here
- * This only manages UI state and coordinates modules
- */
+const val CURRENT_USER_ID = "player_6"
+
 class LeaderboardViewModel(
     private val scoreGenerator: ScoreGenerator,
     private val leaderboardProcessor: LeaderboardProcessor
@@ -30,12 +21,17 @@ class LeaderboardViewModel(
     private val _uiState = MutableStateFlow<LeaderboardUiState>(LeaderboardUiState.Loading)
     val uiState: StateFlow<LeaderboardUiState> = _uiState.asStateFlow()
 
+    private val previousRanks = mutableMapOf<String, Int>()
+
     init {
         startLeaderboardUpdates()
     }
 
     private fun startLeaderboardUpdates() {
-        // Collect score updates from generator
+        viewModelScope.launch {
+            leaderboardProcessor.initialize()
+        }
+
         viewModelScope.launch {
             scoreGenerator.generateScoreUpdates()
                 .catch { error ->
@@ -44,32 +40,39 @@ class LeaderboardViewModel(
                     )
                 }
                 .collect { scoreUpdate ->
-                    // Process each update
                     leaderboardProcessor.processScoreUpdate(scoreUpdate)
                 }
         }
 
-        // Collect leaderboard state from processor
         viewModelScope.launch {
             leaderboardProcessor.leaderboardState
                 .collect { entries ->
-                    _uiState.value = LeaderboardUiState.Success(entries)
+                    val rankDeltas = entries.associate { entry ->
+                        val previous = previousRanks[entry.player.id]
+                        val delta = if (previous != null) previous - entry.rank else 0
+                        entry.player.id to delta
+                    }
+                    entries.forEach { previousRanks[it.player.id] = it.rank }
+
+                    val currentUser = entries.find { it.player.id == CURRENT_USER_ID }
+                    _uiState.value = LeaderboardUiState.Success(
+                        entries = entries,
+                        currentUserRank = currentUser?.rank ?: 0,
+                        currentUserScore = currentUser?.score ?: 0L,
+                        rankDeltas = rankDeltas
+                    )
                 }
         }
     }
-
-    override fun onCleared() {
-        super.onCleared()
-        // Coroutines are automatically cancelled in viewModelScope
-        // No additional cleanup needed
-    }
 }
 
-/**
- * UI State representation
- */
 sealed class LeaderboardUiState {
     object Loading : LeaderboardUiState()
-    data class Success(val entries: List<LeaderboardEntry>) : LeaderboardUiState()
+    data class Success(
+        val entries: List<LeaderboardEntry>,
+        val currentUserRank: Int = 0,
+        val currentUserScore: Long = 0L,
+        val rankDeltas: Map<String, Int> = emptyMap()
+    ) : LeaderboardUiState()
     data class Error(val message: String) : LeaderboardUiState()
 }
