@@ -90,3 +90,11 @@ Android application demonstrating a real-time leaderboard system for a mobile ga
 5. **Feature Flags**: Gradual rollout capability
 6. **Analytics**: Track leaderboard interactions
 7. **Anti-Cheat**: Score velocity checks, anomaly detection
+
+
+
+
+## Screenshort
+
+<img width="1080" height="2412" alt="Screenshot_2026-07-31-14-25-44-55_1b49c8a6cd6af433bad3a458b0324334 jpg" src="https://github.com/user-attachments/assets/eded0804-4e85-4582-89bd-2ea033290d92" />
+
