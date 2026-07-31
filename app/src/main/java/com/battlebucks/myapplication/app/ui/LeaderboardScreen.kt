@@ -137,7 +137,7 @@ private fun SeasonHeader() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
+            .padding(top = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Surface(
@@ -146,7 +146,7 @@ private fun SeasonHeader() {
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
